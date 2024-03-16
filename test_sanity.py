@@ -1,21 +1,52 @@
 import requests
+from requests.exceptions import JSONDecodeError
 
 
-def send_post(method: str):
-    request_body = {"method": method, "jsonrpc": "2.0", "id": 1}
-    res = requests.post("http://localhost:9898/rpc", json=request_body)
-    return res.json()
+def make_valid_payload(method: str, params: dict | None = None) -> dict:
+    payload = {"method": method, "jsonrpc": "2.0", "id": 1}
+
+    if params:
+        payload["params"] = params
+
+    return payload
+
+
+def send_post(method: str | None = None, params: dict | None = None,
+              jsonrpc: str | None = None, id: int | None = None):
+    request_body = {}
+
+    if method:
+        request_body["method"] = method
+
+    if method:
+        request_body["params"] = params
+
+    if method:
+        request_body["jsonrpc"] = jsonrpc
+
+    if method:
+        request_body["id"] = id
+
+    request_headers = {"Authorization": "0000"}
+    res = requests.post("http://localhost:9898/rpc", json=request_body, headers=request_headers)
+
+    try:
+        return res.json()
+    except JSONDecodeError:
+        return {}
 
 
 def get_sensor_info():
-    sensor_response = send_post(method="get_info")
-    sensor_info = sensor_response["result"]
+    payload = make_valid_payload(method="get_info")
+    sensor_response = send_post(**payload)
+    sensor_info = sensor_response.get("result", {})
     return sensor_info
 
 
 def get_sensor_reading():
-    sensor_response = send_post(method="get_reading")
-    sensor_reading = sensor_response["result"]
+    payload = make_valid_payload(method="get_reading")
+    sensor_response = send_post(**payload)
+    sensor_reading = sensor_response.get("result", {})
     return sensor_reading
 
 
@@ -32,7 +63,7 @@ def test_sanity():
     assert isinstance(sensor_model, str), "sensor_model is not a string"
 
     sensor_fw_ver = sensor_info.get("firmware_version")
-    assert isinstance(sensor_fw_ver, float), "firmware_version is not a float"
+    assert isinstance(sensor_fw_ver, int), "firmware_version is not an int"
 
     reading_reading_interval = sensor_info.get("reading_interval")
     assert isinstance(reading_reading_interval, int), "reading_reading_interval is not an int"
@@ -41,6 +72,3 @@ def test_sanity():
     assert isinstance(sensor_reading, float), "Sensor doesn't seem to register temperature"
 
     print("Sanity test passed")
-
-
-test_sanity()
