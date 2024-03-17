@@ -18,13 +18,13 @@ def send_post(method: str | None = None, params: dict | None = None,
     if method:
         request_body["method"] = method
 
-    if method:
+    if params:
         request_body["params"] = params
 
-    if method:
+    if jsonrpc:
         request_body["jsonrpc"] = jsonrpc
 
-    if method:
+    if id:
         request_body["id"] = id
 
     request_headers = {"Authorization": "0000"}
