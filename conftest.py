@@ -5,8 +5,13 @@ import requests
 
 class SensorMethod(Enum):
     GET_INFO = "get_info"
-    GET_READING = "get_reading"
+    GET_METHODS = "get_methods"
     SET_NAME = "set_name"
+    SET_READING_INTERVAL = "set_reading_interval"
+    RESET_TO_FACTORY = "reset_to_factory"
+    UPDATE_FIRMWARE = "update_firmware"
+    REBOOT = "reboot"
+    GET_READING = "get_reading"
 
 
 def make_valid_payload(
@@ -103,9 +108,9 @@ def get_sensor_info(make_valid_request):
 
 
 @pytest.fixture
-def get_sensor_reading(make_valid_request):
+def get_sensor_methods(make_valid_request):
     def inner():
-        return make_valid_request(SensorMethod.GET_READING)
+        return make_valid_request(SensorMethod.GET_METHODS)
 
     return inner
 
@@ -114,5 +119,44 @@ def get_sensor_reading(make_valid_request):
 def set_sensor_name(make_valid_request):
     def inner(name: str):
         return make_valid_request(SensorMethod.SET_NAME, {"name": name})
+
+    return inner
+
+
+@pytest.fixture
+def set_sensor_reading_interval(make_valid_request):
+    def inner(interval: str):
+        return make_valid_request(SensorMethod.SET_READING_INTERVAL, {"interval": interval})
+
+    return inner
+
+
+@pytest.fixture
+def set_sensor_reset_to_factory(make_valid_request):
+    def inner():
+        return make_valid_request(SensorMethod.RESET_TO_FACTORY)
+
+    return inner
+
+
+@pytest.fixture
+def set_sensor_update_firmware(make_valid_request):
+    def inner():
+        return make_valid_request(SensorMethod.UPDATE_FIRMWARE)
+
+    return inner
+
+
+@pytest.fixture
+def set_sensor_reboot(make_valid_request):
+    def inner():
+        return make_valid_request(SensorMethod.REBOOT)
+    return inner
+
+
+@pytest.fixture
+def get_sensor_reading(make_valid_request):
+    def inner():
+        return make_valid_request(SensorMethod.GET_READING)
 
     return inner
