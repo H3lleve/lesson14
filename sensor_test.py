@@ -101,7 +101,6 @@ def test_set_sensor_reading_interval(
 
     print("Step 4", "Get sensor reading")
     sensor_reading_step4 = get_sensor_reading()
-    test = get_sensor_reading
 
     print("Step 5", "Wait for interval specified in Step 1")
     wait(func=get_sensor_reading,
