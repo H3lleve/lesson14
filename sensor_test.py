@@ -1,4 +1,5 @@
 from conftest import wait
+import time
 
 
 def test_sanity(get_sensor_info, get_sensor_reading):
@@ -94,25 +95,22 @@ def test_set_sensor_reading_interval(
     set_sensor_reading_interval(new_sensor_reading_interval)
 
     print("Step 2", "Get sensor info")
-    sensor_info_step2 = get_sensor_info()
+    sensor_info_after_reading_interval_change = get_sensor_info()
 
     print("Step 3", "Validate that sensor reading interval is set to interval from Step 1")
-    assert sensor_info_step2.get("reading_interval") == new_sensor_reading_interval
+    assert sensor_info_after_reading_interval_change.get("reading_interval") == new_sensor_reading_interval
 
     print("Step 4", "Get sensor reading")
-    sensor_reading_step4 = get_sensor_reading()
+    sensor_reading_before_wait = get_sensor_reading()
 
     print("Step 5", "Wait for interval specified in Step 1")
-    wait(func=get_sensor_reading,
-         condition=lambda x: isinstance(x, dict),
-         tries=5,
-         timeout=new_sensor_reading_interval)
+    time.sleep(new_sensor_reading_interval)
 
     print("Step 6", "Get sensor reading")
-    sensor_reading_step6 = get_sensor_reading()
+    sensor_reading_after_wait = get_sensor_reading()
 
     print("Step 7", "Validate that reading from Step 4 doesn't equal reading from Step 6")
-    assert sensor_reading_step6 != sensor_reading_step4
+    assert sensor_reading_after_wait != sensor_reading_before_wait
 
 
 # Максимальна версія прошивки сенсора -- 15
@@ -132,40 +130,37 @@ def test_update_sensor_firmware(get_sensor_info, update_sensor_firmware):
     max_firmware_version = 15
 
     print("Step 1" "Get original sensor firmware version")
-    original_sensor_fw_ver = get_sensor_info().get("firmware_version")
-
-    print("Step 2" "Request firmware update")
-    sensor_fw_upgrade_request = update_sensor_firmware()
-    assert sensor_fw_upgrade_request == "updating"
-    wait(func=get_sensor_info, condition=lambda x: isinstance(x, dict), tries=15, timeout=3)
-
-    print("Step 3" "Get current sensor firmware version")
     current_sensor_fw_ver = get_sensor_info().get("firmware_version")
 
-    print("Step 4" "Validate that current firmware version is +1 to original firmware version")
-    assert current_sensor_fw_ver == (original_sensor_fw_ver + 1)
-
-    print("Step 5" "Repeat steps 1-4 until sensor is at max_firmware_version - 1")
+    print("Step 2" "Request firmware update"
+          "Step 3" "Get current sensor firmware version"
+          "Step 4" "Validate that current firmware version is +1 to original firmware version"
+          "Step 5" "Repeat steps 1-4 until sensor is at max_firmware_version - 1")
     while current_sensor_fw_ver < max_firmware_version - 1:
+        sensor_fw_ver_before_update = current_sensor_fw_ver  # Variable was added to satisfy the requirement in Step 4
         sensor_fw_upgrade_request = update_sensor_firmware()
         assert sensor_fw_upgrade_request == "updating"
-        wait(func=get_sensor_info, condition=lambda x: isinstance(x, dict), tries=15, timeout=3)
+        current_sensor_fw_ver = wait(
+            func=lambda: get_sensor_info().get("firmware_version"),
+            condition=lambda x: isinstance(x, int), tries=15, timeout=3)
 
-        current_sensor_fw_ver = get_sensor_info().get("firmware_version")
+        assert current_sensor_fw_ver == (sensor_fw_ver_before_update + 1)  # Step 4 Check
 
     print("Step 6" "Update sensor to max firmware version")
     sensor_fw_upgrade_request = update_sensor_firmware()
     assert sensor_fw_upgrade_request == "updating"
-    wait(func=get_sensor_info, condition=lambda x: isinstance(x, dict), tries=15, timeout=3)
+
+    current_sensor_fw_ver = wait(
+        func=lambda: get_sensor_info().get("firmware_version"),
+        condition=lambda x: isinstance(x, int), tries=15, timeout=3)
 
     print("Step 7" "Validate that sensor is at max firmware version")
-    assert get_sensor_info().get("firmware_version") == max_firmware_version
+    assert current_sensor_fw_ver == max_firmware_version
 
     print("Step 8" "Request another firmware update")
     sensor_fw_upgrade_request = update_sensor_firmware()
 
     print("Step 9" "Validate that sensor doesn't update and responds appropriately")
-    assert sensor_fw_upgrade_request != "updating"
     assert sensor_fw_upgrade_request == "already at latest firmware version"
 
     print("Step 10" "Validate that sensor firmware version doesn't change if it's at maximum value")
