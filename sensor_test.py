@@ -67,14 +67,14 @@ def test_set_sensor_name(get_sensor_info, set_sensor_name):
     2. Get sensor_info.
     3. Validate that current sensor name matches the name set in Step 1.
     """
-    print("Step 1", 'Set sensor name to "new_name"')
+    print('Step 1: Set sensor name to "new_name"')
     updated_sensor_name = "new_name"
     set_sensor_name(updated_sensor_name)
 
-    print("Step 2", 'Get sensor_info')
+    print('Step 2: Get sensor_info')
     sensor_info_after_name_change = get_sensor_info()
 
-    print("Step 3", 'Validate that current sensor name matches the name set in Step 1')
+    print('Step 3: Validate that current sensor name matches the name set in Step 1')
     assert sensor_info_after_name_change.get("name") == updated_sensor_name
 
 
@@ -90,26 +90,26 @@ def test_set_sensor_reading_interval(
     6. Get sensor reading.
     7. Validate that reading from Step 4 doesn't equal reading from Step 6.
     """
-    print("Step 1", "Set sensor reading interval to 1")
+    print('Step 1: Set sensor reading interval to 1')
     new_sensor_reading_interval = 1
     set_sensor_reading_interval(new_sensor_reading_interval)
 
-    print("Step 2", "Get sensor info")
+    print('Step 2: Get sensor info')
     sensor_info_after_reading_interval_change = get_sensor_info()
 
-    print("Step 3", "Validate that sensor reading interval is set to interval from Step 1")
+    print('Step 3: Validate that sensor reading interval is set to interval from Step 1')
     assert sensor_info_after_reading_interval_change.get("reading_interval") == new_sensor_reading_interval
 
-    print("Step 4", "Get sensor reading")
+    print('Step 4: Get sensor reading')
     sensor_reading_before_wait = get_sensor_reading()
 
-    print("Step 5", "Wait for interval specified in Step 1")
+    print('Step 5: Wait for interval specified in Step 1')
     time.sleep(new_sensor_reading_interval)
 
-    print("Step 6", "Get sensor reading")
+    print('Step 6: Get sensor reading')
     sensor_reading_after_wait = get_sensor_reading()
 
-    print("Step 7", "Validate that reading from Step 4 doesn't equal reading from Step 6")
+    print("Step 7: Validate that reading from Step 4 doesn't equal reading from Step 6")
     assert sensor_reading_after_wait != sensor_reading_before_wait
 
 
@@ -129,39 +129,40 @@ def test_update_sensor_firmware(get_sensor_info, update_sensor_firmware):
     """
     max_firmware_version = 15
 
-    print("Step 1" "Get original sensor firmware version")
+    print('Step 1: Get original sensor firmware version')
     current_sensor_fw_ver = get_sensor_info().get("firmware_version")
 
-    print("Step 2" "Request firmware update"
-          "Step 3" "Get current sensor firmware version"
-          "Step 4" "Validate that current firmware version is +1 to original firmware version"
-          "Step 5" "Repeat steps 1-4 until sensor is at max_firmware_version - 1")
     while current_sensor_fw_ver < max_firmware_version - 1:
-        sensor_fw_ver_before_update = current_sensor_fw_ver  # Variable was added to satisfy the requirement in Step 4
-        sensor_fw_upgrade_request = update_sensor_firmware()
-        assert sensor_fw_upgrade_request == "updating"
+        sensor_fw_ver_before_update = current_sensor_fw_ver
+
+        print('Step 2: Request firmware update')
+        sensor_fw_update_request = update_sensor_firmware()
+        assert sensor_fw_update_request == "updating"
+
+        print('Step 3: Get current sensor firmware version')
         current_sensor_fw_ver = wait(
             func=lambda: get_sensor_info().get("firmware_version"),
             condition=lambda x: isinstance(x, int), tries=15, timeout=3)
 
-        assert current_sensor_fw_ver == (sensor_fw_ver_before_update + 1)  # Step 4 Check
+        print('Step 4: Validate that current firmware version is +1 to original firmware version')
+        assert current_sensor_fw_ver == (sensor_fw_ver_before_update + 1)
 
-    print("Step 6" "Update sensor to max firmware version")
-    sensor_fw_upgrade_request = update_sensor_firmware()
-    assert sensor_fw_upgrade_request == "updating"
+    print('Step 6: Update sensor to max firmware version')
+    sensor_fw_update_request = update_sensor_firmware()
+    assert sensor_fw_update_request == "updating"
 
     current_sensor_fw_ver = wait(
-        func=lambda: get_sensor_info().get("firmware_version"),
+        func=lambda: get_sensor_info().get('firmware_version'),
         condition=lambda x: isinstance(x, int), tries=15, timeout=3)
 
-    print("Step 7" "Validate that sensor is at max firmware version")
+    print('Step 7: Validate that sensor is at max firmware version')
     assert current_sensor_fw_ver == max_firmware_version
 
-    print("Step 8" "Request another firmware update")
-    sensor_fw_upgrade_request = update_sensor_firmware()
+    print('Step 8: Request another firmware update')
+    sensor_fw_update_request = update_sensor_firmware()
 
-    print("Step 9" "Validate that sensor doesn't update and responds appropriately")
-    assert sensor_fw_upgrade_request == "already at latest firmware version"
+    print("Step 9: Validate that sensor doesn't update and responds appropriately")
+    assert sensor_fw_update_request == "already at latest firmware version"
 
-    print("Step 10" "Validate that sensor firmware version doesn't change if it's at maximum value")
+    print("Step 10: Validate that sensor firmware version doesn't change if it's at maximum value")
     assert get_sensor_info().get("firmware_version") == max_firmware_version
