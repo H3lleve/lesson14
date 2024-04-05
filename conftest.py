@@ -4,9 +4,36 @@ from enum import Enum
 import requests
 from typing import Callable
 import logging
+from dataclasses import dataclass
 
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class SensorInfo:
+    name: str
+    hid: str
+    model: str
+    firmware_version: int
+    reading_interval: int  # RuntimeError: Sensor didn't reset to factory property if float
+
+
+    def __post_init__(self):
+        if not isinstance(self.name, str) or self.name == "":
+            raise TypeError("'name' is not a string or empty")
+
+        if not isinstance(self.hid, str) or self.hid == "":
+            raise TypeError("'hid' is not a string or empty")
+
+        if not isinstance(self.model, str) or self.model == "":
+            raise TypeError("'model' is not a string or empty")
+
+        if not isinstance(self.firmware_version, int) or self.firmware_version == "":
+            raise TypeError("'firmware_version' is not an int or empty")
+
+        if not isinstance(self.reading_interval, int) or self.reading_interval == "":
+            raise TypeError("'reading_interval' is not a float or empty")
 
 
 class SensorMethod(Enum):
@@ -138,7 +165,9 @@ def make_valid_request(send_post):
 def get_sensor_info(make_valid_request):
     def _get_sensor_info():
         log.info("Get sensor info")
-        return make_valid_request(SensorMethod.GET_INFO)
+        sensor_response = make_valid_request(SensorMethod.GET_INFO)
+        return SensorInfo(**sensor_response)
+        # return make_valid_request(SensorMethod.GET_INFO)
 
     return _get_sensor_info
 
@@ -192,7 +221,7 @@ def reset_sensor_to_factory(make_valid_request, get_sensor_info):
             )
 
         sensor_info = wait(
-            get_sensor_info, lambda x: isinstance(x, dict), tries=15, timeout=1
+            get_sensor_info, lambda x: isinstance(x, SensorInfo), tries=15, timeout=1
         )
         if not sensor_info:
             raise RuntimeError("Sensor didn't reset to factory property")
