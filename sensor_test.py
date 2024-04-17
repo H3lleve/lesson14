@@ -189,8 +189,7 @@ def test_set_invalid_sensor_reading_interval(get_sensor_info, set_sensor_reading
 
     log.info(f"Set interval to < 1")
     log.info(f"Validate that sensor responds with an error.")
-    assert (set_sensor_reading_interval(random.random()) == {}), \
-        "Received no error in response to assigning sensor invalid reading interval"
+    assert (set_sensor_reading_interval(random.random()) == {}), "Received no error in"
 
     log.info(f"Get current sensor reading interval.")
     log.info("Validate that sensor reading interval didn't change.")
@@ -210,11 +209,10 @@ def test_set_empty_sensor_name(get_sensor_info, set_sensor_name):
     log.info("Get original sensor name.")
     original_sensor_name = get_sensor_info().name
 
-    log.info("Set sensor name to an empty string."
-             "Validate that sensor responds with an error.")
-    assert (set_sensor_name("") == {}), \
-        "Received no error in response to assigning sensor empty name"
+    log.info("Set sensor name to an empty string.")
+    log.info("Validate that sensor responds with an error.")
+    assert (set_sensor_name("") == {}), "Received no error"
 
     log.info("Get current sensor name.")
     log.info("Validate that sensor name didn't change.")
-    assert original_sensor_name == get_sensor_info().name, "Sensor name changed"
+    assert original_sensor_name == get_sensor_info().name, "Sensor name changed to incorrect value"
