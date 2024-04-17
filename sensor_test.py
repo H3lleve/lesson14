@@ -189,7 +189,7 @@ def test_set_invalid_sensor_reading_interval(get_sensor_info, set_sensor_reading
 
     log.info(f"Set interval to < 1")
     log.info(f"Validate that sensor responds with an error.")
-    assert (set_sensor_reading_interval(random.random()) == {}), "Received no error in"
+    assert (set_sensor_reading_interval(random.random()) == {})
 
     log.info(f"Get current sensor reading interval.")
     log.info("Validate that sensor reading interval didn't change.")
