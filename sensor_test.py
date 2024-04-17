@@ -187,22 +187,15 @@ def test_set_invalid_sensor_reading_interval(get_sensor_info, set_sensor_reading
     log.info(f"Get original sensor reading interval.")
     original_sensor_reading_interval = get_sensor_info().reading_interval
 
-    log.info(f"Set interval to < 1"
-             f"Validate that sensor responds with an error.")
-    try:
-        set_sensor_reading_interval(random.random())
-    except (TypeError, ValueError) as _:
-        log.info("Received error")
-        assert True
-    else:
-        assert False, "Error is not received"
+    log.info(f"Set interval to < 1")
+    log.info(f"Validate that sensor responds with an error.")
+    assert (set_sensor_reading_interval(random.random()) == {}), \
+        "Received no error in response to assigning sensor invalid reading interval"
 
     log.info(f"Get current sensor reading interval.")
-    current_sensor_reading_interval = get_sensor_info().reading_interval
-
-    log.info(f"Get current sensor reading interval.")
-    assert current_sensor_reading_interval == original_sensor_reading_interval, ("Sensor reading interval changed "
-                                                                                 "to incorrect value")
+    log.info("Validate that sensor reading interval didn't change.")
+    assert get_sensor_info().reading_interval == original_sensor_reading_interval, \
+        "Sensor reading interval changed to incorrect value"
 
 
 def test_set_empty_sensor_name(get_sensor_info, set_sensor_name):
@@ -219,16 +212,9 @@ def test_set_empty_sensor_name(get_sensor_info, set_sensor_name):
 
     log.info("Set sensor name to an empty string."
              "Validate that sensor responds with an error.")
-    try:
-        set_sensor_name("")
-    except (TypeError, ValueError) as _:
-        log.info("Received error")
-        assert True
-    else:
-        assert False, "Error is not received"
+    assert (set_sensor_name("") == {}), \
+        "Received no error in response to assigning sensor empty name"
 
     log.info("Get current sensor name.")
-    current_sensor_name = get_sensor_info().name
-
     log.info("Validate that sensor name didn't change.")
-    assert original_sensor_name == current_sensor_name, "Sensor name changed"
+    assert original_sensor_name == get_sensor_info().name, "Sensor name changed"
