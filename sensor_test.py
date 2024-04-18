@@ -2,6 +2,7 @@ from conftest import wait
 import time
 import logging
 from conftest import SensorInfo
+import random
 
 log = logging.getLogger(__name__)
 
@@ -171,3 +172,47 @@ def test_update_sensor_firmware(get_sensor_info, update_sensor_firmware):
 
     log.info(f"Validate that sensor firmware version doesn't change if it's at maximum value")
     assert get_sensor_info().firmware_version == max_firmware_version
+
+
+def test_set_invalid_sensor_reading_interval(get_sensor_info, set_sensor_reading_interval, get_sensor_reading):
+    """
+    Test Steps:
+        1. Get original sensor reading interval.
+        2. Set interval to < 1
+        3. Validate that sensor responds with an error.
+        4. Get current sensor reading interval.
+        5. Validate that sensor reading interval didn't change.
+    """
+
+    log.info(f"Get original sensor reading interval.")
+    original_sensor_reading_interval = get_sensor_info().reading_interval
+
+    log.info(f"Set interval to < 1")
+    log.info(f"Validate that sensor responds with an error.")
+    assert (set_sensor_reading_interval(random.random()) == {})
+
+    log.info(f"Get current sensor reading interval.")
+    log.info("Validate that sensor reading interval didn't change.")
+    assert get_sensor_info().reading_interval == original_sensor_reading_interval, \
+        "Sensor reading interval changed to incorrect value"
+
+
+def test_set_empty_sensor_name(get_sensor_info, set_sensor_name):
+    """
+    Test Steps:
+        1. Get original sensor name.
+        2. Set sensor name to an empty string.
+        3. Validate that sensor responds with an error.
+        4. Get current sensor name.
+        5. Validate that sensor name didn't change.
+    """
+    log.info("Get original sensor name.")
+    original_sensor_name = get_sensor_info().name
+
+    log.info("Set sensor name to an empty string.")
+    log.info("Validate that sensor responds with an error.")
+    assert (set_sensor_name("") == {}), "Received no error"
+
+    log.info("Get current sensor name.")
+    log.info("Validate that sensor name didn't change.")
+    assert original_sensor_name == get_sensor_info().name, "Sensor name changed to incorrect value"
